@@ -13,51 +13,40 @@ Dokumen ini memuat detail teknis esensial untuk pengembangan project `news-app-m
 - **Format Respons API**: Di-handle dengan konsep Functional Programming (`Either` pattern).
 - **Routing**: Deklaratif menggunakan `go_router`.
 
-### 1.1 Flow Architecture (Clean Architecture + MVVM)
+### 1.1 Flow Architecture (Pragmatic MVVM)
 
-Aplikasi mengikuti **Clean Architecture** murni dengan pergerakan panah dependensi sebagai berikut:
+Aplikasi mengikuti **Pragmatic Clean Architecture**. Struktur disederhanakan dari 8 layer standar menjadi 4 layer esensial demi mempercepat *development* namun tanpa mengorbankan _testability_ dari ViewModel. 
 
 ```mermaid
 graph TB
-    subgraph Presentation["Presentation Layer"]
+    subgraph Presentation["Presentation Layer (Flutter)"]
         Pages["Pages - UI"]
         Widgets["Widgets"]
         VM["ViewModel (Provider)"]
     end
 
-    subgraph Domain["Domain Layer - Pure Dart"]
-        Entities["Entities"]
-        UseCases["Use Cases"]
-        RepoContract["Repository Contracts"]
+    subgraph Logic["Business & Data Layer (Dart)"]
+        Repo["Repository (Interface + Fungsi API Digabung)"]
+        Models["Models (Entity + Data Object Digabung)"]
     end
 
-    subgraph Data["Data Layer"]
-        Models["Models"]
-        RepoImpl["Repository Impl"]
-        RemoteDS["Remote Datasource"]
-        LocalDS["Local Datasource"]
-    end
-
-    subgraph Core["Core"]
-        ApiClient["ApiClient"]
-        ErrorHandling["Error Handling"]
-        DI["Dependency Injection"]
+    subgraph Core["Core Layer"]
+        ApiClient["ApiClient (Dio)"]
+        ErrorHandling["Either / Failure"]
+        DI["GetIt"]
     end
 
     Pages --> VM
-    VM --> UseCases
-    UseCases --> RepoContract
-    RepoImpl -.implements.-> RepoContract
-    RepoImpl --> RemoteDS
-    RepoImpl --> LocalDS
-    RemoteDS --> ApiClient
-    Models -.extends.-> Entities
+    VM --> Repo
+    Repo --> ApiClient
+    Repo --> Models
 ```
 
-**Prinsip Komunikasi Antar Layer:**
-- **Presentation** (UI & ViewModel) hanya boleh ngobrol dengan **Domain** (UseCase/Repository). *Haram* hukumnya ViewModel manggil ApiClient langsung.
-- **Data** mengimplementasikan Request dari Domain.
-- **Domain** adalah si Bos, dia murni algoritma Dart dan nggak peduli Flutter, Firebase, atau API itu apa.
+**Prinsip Komunikasi 4 Langkah (Trimmed Flow):**
+1. **Pages** memanggil/mengamati (observe) state dari **ViewModel**. *Haram UI bawa-bawa class ApiClient*.
+2. **ViewModel** berbincang langsung dengan **Repository**. *(UseCase dipangkas khusus project ini)*.
+3. **Repository** bertugas langsung memangil API/Server via `ApiClient` lalu mengkonversi hasilnya. *(Memangkas DataSource).*
+4. **Model** berfungsi sekalian ganda yakni sebagai `Model` untuk mem-parsing JSON, serta sebagai `Entity` (mempunyai `Equatable`).
 
 ---
 
