@@ -1,21 +1,47 @@
 # Technical Requirements Document (TRD)
 
-Dokumen ini memuat detail teknis esensial untuk pengembangan project `news-app-mvvm`. Saat ini baru dibahas dua bagian utama: **Spesifikasi Project** dan **Dokumentasi Dependencies**.
+## News App MVVM — Flutter Mobile Application
+
+| Field | Value |
+|-------|-------|
+| **Project Name** | News App MVVM |
+| **Platform** | Flutter (iOS & Android) |
+| **Architecture**| Pragmatic Clean Architecture |
+| **State Mgt.**  | MVVM (Model-View-ViewModel) + Provider |
+| **Version** | 1.0.0 |
+| **Status** | In Development |
 
 ---
 
-## 🏗️ Bagian 1: Spesifikasi Project
+## Table of Contents
 
-- **Nama Project**: `news-app-mvvm`
-- **Pola Arsitektur**: Clean Architecture (Domain, Data, Presentation)
-- **State Management**: MVVM (Model-View-ViewModel) menggunakan `provider` & `ChangeNotifier`. Dilarang menggunakan BLoC.
-- **TDD (Test-Driven Development)**: Wajib diimplementasikan pada setiap fitur (Mulai dari Model -> Repository -> ViewModel).
-- **Format Respons API**: Di-handle dengan konsep Functional Programming (`Either` pattern).
-- **Routing**: Deklaratif menggunakan `go_router`.
+1. [Overview & Specifications](#1-overview--specifications)
+2. [System Architecture](#2-system-architecture)
+3. [Technology Stack and Library Selection](#3-technology-stack-and-library-selection)
 
-### 1.1 Flow Architecture (Pragmatic MVVM)
+---
 
-Aplikasi mengikuti **Pragmatic Clean Architecture**. Struktur disederhanakan dari 8 layer standar menjadi 4 layer esensial demi mempercepat *development* namun tanpa mengorbankan _testability_ dari ViewModel. 
+## 1. Overview & Specifications
+
+### 1.1 Purpose
+Aplikasi ini adalah inkarnasi dari platform manajemen berita menggunakan framework Flutter. Berbeda dengan project sebelumnya, inkarnasi ini secara tegas meninggalkan pattern BLoC dan mengadopsi pendekatan **MVVM (Model-View-ViewModel)** yang lebih praktis (Pragmatic) namun tetap mempertahankan prinsip Test-Driven Development (TDD).
+
+### 1.2 Core Specifications
+
+| Category | Specification Constraints |
+|----------|---------------------------|
+| **Architecture Pattern** | Pragmatic Clean Architecture (Dipersingkat menjadi 4 Lapisan). |
+| **State Management** | MVVM menggunakan package `provider` & `ChangeNotifier`. |
+| **Testing Requirement**| Wajib TDD (Red-Green-Refactor) pada ViewModel & Repository layer. |
+| **Network Response** | Wajib dibungkus dengan `Either<Failure, T>` constraint. |
+
+---
+
+## 2. System Architecture
+
+### 2.1 Pragmatic MVVM Flow
+
+Aplikasi mengikuti **Pragmatic Clean Architecture**. Struktur disederhanakan dari standar 8 layer penuh menjadi 4 layer esensial demi mempercepat *development* namun tanpa mengorbankan _testability_ UI/ViewModel.
 
 ```mermaid
 graph TB
@@ -42,65 +68,44 @@ graph TB
     Repo --> Models
 ```
 
-**Prinsip Komunikasi 4 Langkah (Trimmed Flow):**
-1. **Pages** memanggil/mengamati (observe) state dari **ViewModel**. *Haram UI bawa-bawa class ApiClient*.
-2. **ViewModel** berbincang langsung dengan **Repository**. *(UseCase dipangkas khusus project ini)*.
-3. **Repository** bertugas langsung memangil API/Server via `ApiClient` lalu mengkonversi hasilnya. *(Memangkas DataSource).*
-4. **Model** berfungsi sekalian ganda yakni sebagai `Model` untuk mem-parsing JSON, serta sebagai `Entity` (mempunyai `Equatable`).
+### 2.2 Dependency Rule
+
+- **Presentation (UI & ViewModel):** Hanya boleh berkomunikasi dengan Repository. *Haram* hukumnya ViewModel memanggil ApiClient langsung.
+- **Repository:** Bertugas mengkonsumsi ApiClient secara absolut, mem-parsing response menjadi Models. (UseCase dipangkas khusus untuk iterasi project ini).
+- **Models:** Berfungsi ganda sebagai wadah Serialisasi JSON sekaligus menjunjung kontrak *Value-Equality* murni.
 
 ---
 
-## 📦 Bagian 2: Dokumentasi Dependencies
+## 3. Technology Stack and Library Selection
 
-Berikut adalah penjelasan daftar pustaka (package) pihak ketiga yang diinstal pada project ini beserta perannya:
+### 3.1 Network & Communication
 
-## 🏗️ 1. State Management & arsitektur
-### `provider` (v6+)
-- **Peran:** Mengelola state pada lapisan *Presentation* (sebagai penghubung View dan ViewModel).
-- **Justifikasi Alasan:** Sesuai kesepakatan desain, BLoC digantikan dengan Provider. Kombinasi `ChangeNotifier` (bawaan Flutter) sangat ringan, natural, dan mudah dimengerti untuk penerapan MVVM murni. Pengecekan state cukup dengan `context.watch<ViewModel>()`.
-- **Lokasi Pemakaian:** Sepenuhnya di `presentation/viewmodels/` dan `presentation/views/`.
+| Library | Version | Justification | Alternatif yang Dipertimbangkan |
+|---------|---------|---------------|-------------------------------|
+| **dio** | ^5.9.2 | Powerful HTTP client dengan interceptor untuk log dan otorisasi terpusat. | `http` — terlalu basic, tidak memiliki interceptor bawaan. |
 
----
+### 3.2 State Management & Architecture
 
-## 📡 2. Jaringan & Komunikasi Data
-### `dio` (v5+)
-- **Peran:** HTTP Client untuk menembak API dan mengambil data.
-- **Justifikasi Alasan:** Sangat powerful karena mendukung *Interceptors* (enak untuk nyisipin Token Authorization global), manipulasi Form Data yang mudah, serta *Timeout handling* yang stabil dibanding `http` biasa.
-- **Lokasi Pemakaian:** Hanya di `data/datasources/remote_datasource.dart`.
+| Library | Version | Justification | Alternatif yang Dipertimbangkan |
+|---------|---------|---------------|-------------------------------|
+| **provider** | ^6.1.5 | State management ringan dan *native-like* yang sempurna untuk MVVM. Reaktivitasnya instan menggunakan `ChangeNotifier`. | `flutter_bloc` / `cubit` — Dianulir karena kita berpindah haluan menuju *Method-driven* architecture (MVVM), bukan *Event-driven*. |
+| **equatable** | ^2.0.8 | Memastikan komparasi *Value Equality* instan pada Object, sangat vital bagi kredibilitas Unit Test dan *Mocking*. | *Override manual* `==` dan `hashCode` — Terlalu rentan *human-error* dan memperlambat *development*. |
+| **dartz** | ^0.10.1 | Functional programming mutlak untuk menangkap Failure dan Success response melalui pattern `Either<L,R>`. | *Exception (try/catch)* — Dihindari demi visibilitas code, mencegah UI *crash* mendadak. |
 
----
+### 3.3 Routing & Navigation
 
-## 🧱 3. Functional Programming & Struktur
-### `dartz` (v0.10+)
-- **Peran:** Menangani Error dan Response Handling terpadu (Functional Programming).
-- **Justifikasi Alasan:** `dartz` membawa tipe data `Either<L, R>`. Fitur ini memaksa developer untuk **secara sadar** menghandle dua kemungkinan kembalian fungsi: `Left` (kalau gagal/Error) dan `Right` (kalian berhasil/Success). Exception tidak akan meledak merusak UI secara gaib karena tertangkap rapi oleh *Failure class*. 
-- **Lokasi Pemakaian:** `domain/repositories/` dan `presentation/viewmodels/`.
+| Library | Version | Justification | Alternatif yang Dipertimbangkan |
+|---------|---------|---------------|-------------------------------|
+| **go_router** | ^17.2.0 | Deklaratif routing resmi yang mensupport *Deep Linking* dan penanganan *Auth Redirection* layaknya web konvensional. | `auto_route` — Overkill untuk aplikasi berskala menengah karena melibatkan *code generation* yang masif. |
 
-### `equatable` (v2+)
-- **Peran:** Mengeksekusi perbandingan "Value Equality" secara instan.
-- **Justifikasi Alasan:** Seperti yang dijelaskan sebelumnya, Dart ngecek lokasi memori, bukan isi objek. Di arsitektur Clean yang mewajibkan objek diubah-ubah bentuknya layaknya Transformer (JSON -> Model -> Entity), Equatable wajib ada biar kita gak capek bikin override `==` manual, dan Unit Test (`expect`) tidak selalu `false`.
-- **Lokasi Pemakaian:** Hampir semua kelas (khususnya `data/models/` dan `domain/entities/`).
+### 3.4 Dependency Injection (Service Locator)
 
----
+| Library | Version | Justification | Alternatif yang Dipertimbangkan |
+|---------|---------|---------------|-------------------------------|
+| **get_it** | ^9.2.1 | Cara paling simpel untuk mendaftarkan dan menemukan objek `Repository` atau `ViewModel` secara instan dari manapun di *Widget Tree*. | *Constructor Passing (Manual Di)* — Sangat melelahkan untuk hierarki widget yang sangat dalam. |
 
-## 🧭 4. Dependency Injection (Mencari Objek Secara Global)
-### `get_it` (v9+)
-- **Peran:** Service Locator (Mendaftarkan dan Mencarikan instance secara global).
-- **Justifikasi Alasan:** MVVM itu merangkai objek (View butuh ViewModel, ViewModel butuh UseCase/Repository, Repository butuh DataSource, DataSource butuh Dio). Mengoper instance berlapis-lapis lewat *constructor/param* sungguh melelahkan. Dengan `get_it`, kita tinggal panggil `sl<MyViewModel>()`, dan *BAM!* semua dependency di dalamnya otomatis dibikinin.
-- **Lokasi Pemakaian:** File `injection_container.dart` dan injeksi di UI / Routes.
+### 3.5 Development & Testing Tools
 
----
-
-## 🧪 5. Testing Tools (Lingkungan Dev)
-### `mocktail` (v1+)
-- **Peran:** Mocking/Memalsukan Objek untuk TDD.
-- **Justifikasi Alasan:** Karena kita gak mungkin ngetes Unit Test dengan nyambung internet/DB sungguhan (kasihan tagihan server dan test-nya jadi lambat!), kita gunakan `mocktail` untuk membuat *Objek Kembaran Tiruan*. Kembaran ini bisa disuruh *"Heh! Nanti kalau fungsi A kepanggil, pura-puranya lo balikin nilai 500 ya!"* Cara kerjanya lebih luwes dan simpel dibanding `mockito` (karena tidak perlu Code Generation / build runner yang lama).
-- **Lokasi Pemakaian:** Sisi folder `test/.../`.
-
----
-
-## 🗺️ 6. Navigasi & Routing
-### `go_router` (v14+)
-- **Peran:** Mengatur perpindahan layar (Routing) secara deklaratif dan mendukung Deep Linking.
-- **Justifikasi Alasan:** `go_router` adalah router resmi yang direkomendasikan oleh tim Flutter (Google). Sangat cocok dan mudah dipadukan dengan *Dependency Injection* karena kita cukup mendefinisikan seluruh `Route` di satu file Core terpusat, lalu pindah layar cukup dengan `context.go('/home')`. Lebih rapi ketimbang fungsi bawaan `Navigator.push`.
-- **Lokasi Pemakaian:** `core/routes/` dan dieksekusi di seluruh UI lapis `presentation/`.
+| Library | Version | Justification |
+|---------|---------|---------------|
+| **mocktail** | ^1.0.4 | Digunakan untuk melahirkan kembaran palsu/tiruan (Mocks) dari Repository layaknya Objek sungguhan pada TDD. Tanpa *build_runner*. |
