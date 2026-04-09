@@ -18,6 +18,7 @@
 1. [Overview & Specifications](#1-overview--specifications)
 2. [System Architecture](#2-system-architecture)
 3. [Technology Stack and Library Selection](#3-technology-stack-and-library-selection)
+4. [Feature Designs & Workflows](#4-feature-designs--workflows)
 
 ---
 
@@ -109,3 +110,11 @@ graph TB
 | Library | Version | Justification |
 |---------|---------|---------------|
 | **mocktail** | ^1.0.4 | Digunakan untuk melahirkan kembaran palsu/tiruan (Mocks) dari Repository layaknya Objek sungguhan pada TDD. Tanpa *build_runner*. |
+
+---
+
+## 4. Feature Designs & Workflows
+
+Spesifikasi desain arsitektur, diagram alir (Flowchart), dan integrasi per modul fitur disimpan dalam dokumen terpisah untuk menjaga TRD ini tetap ringkas:
+
+- **[Dokumen Desain Fitur Authentication (Login)](features/auth_design.md)**
