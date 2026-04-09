@@ -4,36 +4,31 @@ Dokumen ini menjelaskan rancangan alur fungsional dan teknis untuk fitur **Login
 
 ---
 
-## 1. Flowchart Login
-Flowchart ini menggambarkan *decision checking* secara proses fungsional yang dialami oleh fitur Login dari input user hingga selesai.
+## 1. Flowchart Login (User & Business Flow)
+Flowchart ini **murni** menggambarkan alur perjalanan pengguna (User Journey) dan Keputusan Sistem pada interaksi antarmuka (UI). Tidak dicampur dengan istilah teknis (*class/layer*).
 
 ```mermaid
 graph TD
-    A([Start: Pencet Tombol Login]) --> B{Validasi Input Form?}
-    B -- Kosong/Salah Format --> C[Tampilkan Peringatan UI]
-    B -- Valid --> D[Panggil AuthViewModel.login]
+    A([Start: User Menekan Tombol Login]) --> B{Validasi Input Form?}
     
-    D --> E[Set State: isLoading = true]
-    E --> F[AuthRepo.login]
+    B -- Kosong/Format Salah --> C[Sistem Memunculkan Peringatan Validasi]
     
-    F --> G{Koneksi API Berhasil?}
-    G -- Gagal Network/Timeout --> H[Return Left: NetworkFailure]
-    G -- Sukses Terkirim --> I{Kredensial Benar? 200 OK}
+    B -- Format Valid --> D[Sistem Menampilkan Indikator Loading]
+    D --> E[Sistem Melakukan Autentikasi ke Server]
     
-    I -- Salah 401 --> J[Return Left: ServerFailure 'Invalid Credential']
-    I -- Benar 200 --> K[Save Token ke Local Storage]
+    E --> F{Status Koneksi & Respon?}
+    F -- Mode Pesawat/Timeout --> G[Sistem Memunculkan Alert Gangguan Jaringan]
+    F -- Tersambung ke Server --> H{Pengecekan Kredensial}
     
-    K --> L[Return Right: AuthTokens Model]
+    H -- Salah (401) --> I[Sistem Memunculkan Alert Salah Email/Password]
+    H -- Berhasil (200) --> J[Sistem Menyimpan Sesi (Token Lokal)]
     
-    H --> M(ViewModel Terima Left)
-    J --> M
-    L --> N(ViewModel Terima Right)
+    C --> O([Flow Selesai])
+    G --> O
+    I --> O
     
-    M --> O[Set State: Error + Panggil alert]
-    N --> P[Set State: Success + Navigate to Dashboard]
-    
-    O --> Q([End])
-    P --> Q([End])
+    J --> N[Sistem Mengarahkan User ke Dashboard]
+    N --> P([Flow Selesai & Berhasil])
 ```
 
 ---
