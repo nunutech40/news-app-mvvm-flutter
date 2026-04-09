@@ -9,26 +9,26 @@ Flowchart ini **murni** menggambarkan alur perjalanan pengguna (User Journey) da
 
 ```mermaid
 graph TD
-    A([Start: User Menekan Tombol Login]) --> B{Validasi Input Form?}
+    A(["Start: User Menekan Tombol Login"]) --> B{"Validasi Input Form?"}
     
-    B -- Kosong/Format Salah --> C[Sistem Memunculkan Peringatan Validasi]
+    B -- Kosong/Format Salah --> C["Sistem Memunculkan Peringatan Validasi"]
     
-    B -- Format Valid --> D[Sistem Menampilkan Indikator Loading]
-    D --> E[Sistem Melakukan Autentikasi ke Server]
+    B -- Format Valid --> D["Sistem Menampilkan Indikator Loading"]
+    D --> E["Sistem Melakukan Autentikasi ke Server"]
     
-    E --> F{Status Koneksi & Respon?}
-    F -- Mode Pesawat/Timeout --> G[Sistem Memunculkan Alert Gangguan Jaringan]
-    F -- Tersambung ke Server --> H{Pengecekan Kredensial}
+    E --> F{"Status Koneksi & Respon?"}
+    F -- Mode Pesawat/Timeout --> G["Sistem Memunculkan Alert Gangguan Jaringan"]
+    F -- Tersambung ke Server --> H{"Pengecekan Kredensial"}
     
-    H -- Salah (401) --> I[Sistem Memunculkan Alert Salah Email/Password]
-    H -- Berhasil (200) --> J[Sistem Menyimpan Sesi (Token Lokal)]
+    H -- Salah (401) --> I["Sistem Memunculkan Alert Salah Email/Password"]
+    H -- Berhasil (200) --> J["Sistem Menyimpan Sesi (Token Lokal)"]
     
-    C --> O([Flow Selesai])
+    C --> O(["Flow Selesai"])
     G --> O
     I --> O
     
-    J --> N[Sistem Mengarahkan User ke Dashboard]
-    N --> P([Flow Selesai & Berhasil])
+    J --> N["Sistem Mengarahkan User ke Dashboard"]
+    N --> P(["Flow Selesai & Berhasil"])
 ```
 
 ---
