@@ -24,7 +24,7 @@
 ## 1. Overview & Specifications
 
 ### 1.1 Purpose
-Aplikasi ini adalah inkarnasi dari platform manajemen berita menggunakan framework Flutter. Berbeda dengan project sebelumnya, inkarnasi ini secara tegas meninggalkan pattern BLoC dan mengadopsi pendekatan **MVVM (Model-View-ViewModel)** yang lebih praktis (Pragmatic) namun tetap mempertahankan prinsip Test-Driven Development (TDD).
+Aplikasi ini adalah platform manajemen berita berbasis mobile yang dikembangkan menggunakan framework Flutter. Arsitektur aplikasi ini murni dibangun dengan pendekatan **MVVM (Model-View-ViewModel)** yang praktis, menggunakan `provider` sebagai state management. Aplikasi secara ketat mempertahankan dan menjunjung tinggi prinsip Test-Driven Development (TDD) pada core logic.
 
 ### 1.2 Core Specifications
 
@@ -88,7 +88,7 @@ graph TB
 
 | Library | Version | Justification | Alternatif yang Dipertimbangkan |
 |---------|---------|---------------|-------------------------------|
-| **provider** | ^6.1.5 | State management ringan dan *native-like* yang sempurna untuk MVVM. Reaktivitasnya instan menggunakan `ChangeNotifier`. | `flutter_bloc` / `cubit` — Dianulir karena kita berpindah haluan menuju *Method-driven* architecture (MVVM), bukan *Event-driven*. |
+| **provider** | ^6.1.5 | State management ringan dan *native-like* yang dirancang murni untuk *Method-driven* architecture seperti MVVM. Reaktivitasnya instan menggunakan kumpulan `ChangeNotifierProvider` dan `Consumer`. | Pustaka `ValueNotifier` bawaan manual dinilai terlalu terbatas dan sulit untuk mensuplai *Dependency* ke seluruh hierarki widget secara terpusat. |
 | **equatable** | ^2.0.8 | Memastikan komparasi *Value Equality* instan pada Object, sangat vital bagi kredibilitas Unit Test dan *Mocking*. | *Override manual* `==` dan `hashCode` — Terlalu rentan *human-error* dan memperlambat *development*. |
 | **dartz** | ^0.10.1 | Functional programming mutlak untuk menangkap Failure dan Success response melalui pattern `Either<L,R>`. | *Exception (try/catch)* — Dihindari demi visibilitas code, mencegah UI *crash* mendadak. |
 
