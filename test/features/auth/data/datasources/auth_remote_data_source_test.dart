@@ -1,29 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-
-// Import komponen nyata: (Pastikan path-nya benar!)
 import 'package:news_app_mvvm/core/network/api_client.dart';
 import 'package:news_app_mvvm/core/error/exceptions.dart';
-
-// Import target yang belum dibikin (Inilah sebabnya test ini akan merah total!)
+import 'package:news_app_mvvm/features/auth/data/models/auth_tokens_model.dart';
+import 'package:news_app_mvvm/features/auth/data/models/user_model.dart';
 import 'package:news_app_mvvm/features/auth/data/datasources/auth_remote_data_source.dart';
 
-/// -------------------------------------------------------------
-/// Penjelasan Test: AuthRemoteDataSource
-/// -------------------------------------------------------------
-/// File ini men-test lapisan Datasource untuk Auth (Login).
-/// Tugas layer ini sederhana: 
-/// Dia mengambil password & email mentah dari lapisan atas,
-/// melemparnya ke [ApiClient], lalu mengekstrak "token" dari balasan server.
-/// 
-/// Kebutuhan (Requirements):
-/// 1. Jika API sukses (HTTP 200), harus mengekstrak field 'token' dari JSON
-///    dan me-return-nya sebagai String.
-/// 2. Jika API gagal (Throws ServerException), layer ini harus membiarkan
-///    Exception tersebut diteruskan (tidak ditelan).
-/// -------------------------------------------------------------
-
-// Bikin Mock dari kelas murni ApiClient kita!
 class MockApiClient extends Mock implements ApiClient {}
 
 void main() {
@@ -35,61 +17,189 @@ void main() {
     dataSource = AuthRemoteDataSourceImpl(apiClient: mockApiClient);
   });
 
-  group('Login System di Datasource', () {
+  group('AuthRemoteDataSource Login', () {
     const tEmail = 'test@example.com';
     const tPassword = 'password123';
     
-    // Anggap saja Endpoint backend API kita membalas dengan struktur map seperti ini
+    // Perbaikan: Contract JSON sesuai dengan Postman File
     final tJsonResponsePayload = {
-      'status': 'success',
+      'success': true,
       'data': {
-        'token': 'bearer_token_super_rahasia_12345',
-        'user': {
-          'id': 1,
-          'name': 'Budi'
-        }
+        'access_token': 'bearer_token_super_rahasia_12345',
+        'refresh_token': 'refresh_12345'
       }
     };
+
+    // Model yang diekspektasikan sebagai hasil keluaran dari DataSource
+    const tAuthTokensModel = AuthTokensModel(
+      accessToken: 'bearer_token_super_rahasia_12345',
+      refreshToken: 'refresh_12345',
+    );
     
-    test('harus mereturn Token (String) apabila login berhasil', () async {
+    test('harus mereturn AuthTokensModel apabila login via ApiClient berhasil', () async {
       // 1. ARRANGE
-      // Instruksikan si Tuyul: "Setiap ada request POST ke '/login' bawa body apapun, balas pake JSON sukses ini!"
       when(() => mockApiClient.post(
-            '/login',
+            any(),
             data: any(named: 'data'),
+            queryParameters: any(named: 'queryParameters'),
+            options: any(named: 'options'),
+            cancelToken: any(named: 'cancelToken'),
+            onSendProgress: any(named: 'onSendProgress'),
+            onReceiveProgress: any(named: 'onReceiveProgress')
           )).thenAnswer((_) async => tJsonResponsePayload);
 
       // 2. ACT
       final result = await dataSource.login(email: tEmail, password: tPassword);
 
       // 3. ASSERT
-      // Buktikan bahwa data yang dikeluarkan adalah murni string token
-      expect(result, 'bearer_token_super_rahasia_12345');
+      expect(result, tAuthTokensModel);
       
-      // Keamanan ganda: Buktikan email dan password terkirim dengan benar ke dalam body POST
       verify(() => mockApiClient.post(
-            '/login',
+            '/api/v1/auth/login',
             data: {
               'email': tEmail,
               'password': tPassword,
             },
+            queryParameters: null,
+            options: null,
+            cancelToken: null,
+            onSendProgress: null,
+            onReceiveProgress: null
           )).called(1);
     });
 
-    test('harus memancarkan kembali ServerException apabila gagal login', () async {
+    test('harus memancarkan ServerException apabila backend API melempar error', () async {
       // 1. ARRANGE
-      // ApiClient error melempar ServerException
       when(() => mockApiClient.post(
-            '/login',
+            any(),
             data: any(named: 'data'),
-          )).thenThrow(const ServerException(message: 'Email tidak ditemukan', statusCode: 404));
+            queryParameters: any(named: 'queryParameters'),
+            options: any(named: 'options'),
+            cancelToken: any(named: 'cancelToken'),
+            onSendProgress: any(named: 'onSendProgress'),
+            onReceiveProgress: any(named: 'onReceiveProgress')
+          )).thenThrow(const ServerException(message: 'Email belum terdaftar', statusCode: 400));
 
       // 2. ACT
-      // Jangan taruh 'await' karena kita men-test Exception
       final call = dataSource.login(email: tEmail, password: tPassword);
 
       // 3. ASSERT
       expect(() => call, throwsA(isA<ServerException>()));
     });
   });
+
+  group('AuthRemoteDataSource GetProfile', () {
+    final tJsonResponsePayload = {
+      'success': true,
+      'data': {
+        'id': 1,
+        'name': 'Budi',
+        'email': 'budi@test.com',
+        'avatar_url': 'https://avatar.com/budi.png',
+      }
+    };
+
+    const tUserModel = UserModel(
+      id: 1,
+      name: 'Budi',
+      email: 'budi@test.com',
+      avatarUrl: 'https://avatar.com/budi.png',
+    );
+
+    test('harus mereturn UserModel apabila getProfile via ApiClient berhasil', () async {
+      // 1. ARRANGE
+      when(() => mockApiClient.get(
+            any(),
+            queryParameters: any(named: 'queryParameters'),
+            options: any(named: 'options'),
+            cancelToken: any(named: 'cancelToken'),
+            onReceiveProgress: any(named: 'onReceiveProgress')
+          )).thenAnswer((_) async => tJsonResponsePayload);
+
+      // 2. ACT
+      final result = await dataSource.getProfile();
+
+      // 3. ASSERT
+      expect(result, tUserModel);
+      verify(() => mockApiClient.get(
+            '/api/v1/auth/user', // Sesuaikan endpoint dengan postman jika berbeda
+            queryParameters: null,
+            options: null,
+            cancelToken: null,
+            onReceiveProgress: null
+          )).called(1);
+    });
+
+    test('harus memancarkan ServerException apabila backend API melempar error saat getProfile', () async {
+      // 1. ARRANGE
+      when(() => mockApiClient.get(
+            any(),
+            queryParameters: any(named: 'queryParameters'),
+            options: any(named: 'options'),
+            cancelToken: any(named: 'cancelToken'),
+            onReceiveProgress: any(named: 'onReceiveProgress')
+          )).thenThrow(const ServerException(message: 'Token expired', statusCode: 401));
+
+      // 2. ACT
+      final call = dataSource.getProfile();
+
+      // 3. ASSERT
+      expect(() => call, throwsA(isA<ServerException>()));
+    });
+  });
+
+  group('AuthRemoteDataSource Logout', () {
+    const tRefreshToken = 'refresh_12345';
+    final tJsonResponsePayload = {
+      'success': true,
+      'message': 'Successfully logged out'
+    };
+
+    test('harus berhasil (void) apabila logout via ApiClient sukses', () async {
+      // 1. ARRANGE
+      when(() => mockApiClient.post(
+            any(),
+            data: any(named: 'data'),
+            queryParameters: any(named: 'queryParameters'),
+            options: any(named: 'options'),
+            cancelToken: any(named: 'cancelToken'),
+            onSendProgress: any(named: 'onSendProgress'),
+            onReceiveProgress: any(named: 'onReceiveProgress')
+          )).thenAnswer((_) async => tJsonResponsePayload);
+
+      // 2. ACT
+      await dataSource.logout(refreshToken: tRefreshToken);
+
+      // 3. ASSERT
+      verify(() => mockApiClient.post(
+            '/api/v1/auth/logout',
+            data: {'refresh_token': tRefreshToken},
+            queryParameters: null,
+            options: null,
+            cancelToken: null,
+            onSendProgress: null,
+            onReceiveProgress: null
+          )).called(1);
+    });
+
+    test('harus memancarkan ServerException apabila backend melempar error saat logout', () async {
+      // 1. ARRANGE
+      when(() => mockApiClient.post(
+            any(),
+            data: any(named: 'data'),
+            queryParameters: any(named: 'queryParameters'),
+            options: any(named: 'options'),
+            cancelToken: any(named: 'cancelToken'),
+            onSendProgress: any(named: 'onSendProgress'),
+            onReceiveProgress: any(named: 'onReceiveProgress')
+          )).thenThrow(const ServerException(message: 'Invalid Refresh Token', statusCode: 401));
+
+      // 2. ACT
+      final call = dataSource.logout(refreshToken: tRefreshToken);
+
+      // 3. ASSERT
+      expect(() => call, throwsA(isA<ServerException>()));
+    });
+  });
 }
+

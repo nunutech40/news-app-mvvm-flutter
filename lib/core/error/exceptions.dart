@@ -10,3 +10,9 @@ class NetworkException implements Exception {
 
   const NetworkException({required this.message});
 }
+
+class CacheException implements Exception {
+  final String message;
+
+  const CacheException({required this.message});
+}
