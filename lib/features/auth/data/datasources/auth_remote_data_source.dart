@@ -1,4 +1,5 @@
 import 'package:news_app_mvvm/core/network/api_client.dart';
+import 'package:news_app_mvvm/core/constants/api_constants.dart';
 import 'package:news_app_mvvm/features/auth/data/models/auth_tokens_model.dart';
 import 'package:news_app_mvvm/core/error/exceptions.dart';
 import 'package:news_app_mvvm/features/auth/data/models/user_model.dart';
@@ -40,7 +41,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) async {
     // 1. Eksekusi Request ke Network via ApiClient Wrapper
     final response = await apiClient.post(
-      '/api/v1/auth/login',
+      ApiConstants.login,
       data: {'email': email, 'password': password},
     );
 
@@ -65,7 +66,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     final response = await apiClient.post(
-      '/api/v1/auth/register',
+      ApiConstants.register,
       data: {'name': name, 'email': email, 'password': password},
     );
 
@@ -82,7 +83,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel> getProfile() async {
-    final response = await apiClient.get('/api/v1/auth/user');
+    final response = await apiClient.get(ApiConstants.profile);
 
     if (response['success'] == true) {
       return UserModel.fromJson(response['data'] as Map<String, dynamic>);
@@ -98,7 +99,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> updateProfile(UserModel user) async {
     final response = await apiClient.post(
-      '/api/v1/auth/user',
+      ApiConstants.profile,
       data: user.toJson(),
     );
 
@@ -114,7 +115,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> logout({required String refreshToken}) async {
     final response = await apiClient.post(
-      '/api/v1/auth/logout',
+      ApiConstants.logout,
       data: {'refresh_token': refreshToken},
     );
 
