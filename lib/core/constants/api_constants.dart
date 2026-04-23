@@ -1,7 +1,7 @@
 class ApiConstants {
   /// Base URL Backend. Gunakan 10.0.2.2 untuk emulator Android lokal,
   /// atau IP server sungguhan.
-  static const String baseUrl = 'http://103.181.143.73';
+  static const String baseUrl = 'http://103.181.143.73:8081';
 
   // ===============================
   // AUTH ENTPOINT
