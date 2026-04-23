@@ -28,6 +28,7 @@ import 'package:news_app_mvvm/features/news/domain/usecases/get_categories_useca
 import 'package:news_app_mvvm/features/news/domain/usecases/get_news_feed_usecase.dart';
 import 'package:news_app_mvvm/features/news/domain/usecases/toggle_bookmark_usecase.dart';
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/article_detail_viewmodel.dart';
+import 'package:news_app_mvvm/features/news/presentation/viewmodels/explore_viewmodel.dart';
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/bookmark_viewmodel.dart';
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/news_feed_viewmodel.dart';
 
@@ -127,5 +128,9 @@ Future<void> initDependencies() async {
       checkBookmarkStatusUseCase: sl(),
       toggleBookmarkUseCase: sl(),
     ),
+  );
+
+  sl.registerFactory<ExploreViewModel>(
+    () => ExploreViewModel(getNewsFeedUseCase: sl()),
   );
 }

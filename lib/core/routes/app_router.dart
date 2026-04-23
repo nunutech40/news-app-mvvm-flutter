@@ -5,6 +5,9 @@ import 'package:news_app_mvvm/features/auth/presentation/pages/login_page.dart';
 import 'package:news_app_mvvm/features/auth/presentation/pages/register_page.dart';
 import 'package:news_app_mvvm/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:news_app_mvvm/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:news_app_mvvm/features/news/presentation/pages/news_detail_page.dart';
+import 'package:news_app_mvvm/features/news/presentation/viewmodels/article_detail_viewmodel.dart';
+import 'package:provider/provider.dart';
 import 'package:news_app_mvvm/injection_container.dart';
 
 class AppRouter {
@@ -63,6 +66,17 @@ class AppRouter {
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: '/article/:slug',
+        name: 'articleDetail',
+        builder: (context, state) {
+          final slug = state.pathParameters['slug']!;
+          return ChangeNotifierProvider(
+            create: (_) => sl<ArticleDetailViewModel>(),
+            child: NewsDetailPage(slug: slug),
+          );
+        },
       ),
     ],
   );

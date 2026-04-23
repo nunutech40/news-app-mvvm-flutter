@@ -8,6 +8,7 @@ import 'package:news_app_mvvm/features/news/presentation/pages/bookmark_page.dar
 import 'package:news_app_mvvm/features/auth/presentation/pages/profile_page.dart';
 
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/news_feed_viewmodel.dart';
+import 'package:news_app_mvvm/features/news/presentation/viewmodels/explore_viewmodel.dart';
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/bookmark_viewmodel.dart';
 import 'package:news_app_mvvm/injection_container.dart';
 
@@ -26,7 +27,10 @@ class _DashboardPageState extends State<DashboardPage> {
       create: (_) => sl<NewsFeedViewModel>(),
       child: const NewsFeedPage(),
     ),
-    const ExplorePage(),
+    ChangeNotifierProvider(
+      create: (_) => sl<ExploreViewModel>(),
+      child: const ExplorePage(),
+    ),
     const NewsSearchPage(),
     ChangeNotifierProvider(
       create: (_) => sl<BookmarkViewModel>(),
