@@ -30,6 +30,7 @@ import 'package:news_app_mvvm/features/news/domain/usecases/toggle_bookmark_usec
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/article_detail_viewmodel.dart';
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/explore_viewmodel.dart';
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/bookmark_viewmodel.dart';
+import 'package:news_app_mvvm/features/news/presentation/viewmodels/search_viewmodel.dart';
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/news_feed_viewmodel.dart';
 
 final sl = GetIt.instance;
@@ -132,5 +133,9 @@ Future<void> initDependencies() async {
 
   sl.registerFactory<ExploreViewModel>(
     () => ExploreViewModel(getNewsFeedUseCase: sl()),
+  );
+
+  sl.registerFactory<SearchViewModel>(
+    () => SearchViewModel(getNewsFeedUseCase: sl()),
   );
 }

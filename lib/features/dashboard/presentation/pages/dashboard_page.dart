@@ -10,6 +10,7 @@ import 'package:news_app_mvvm/features/auth/presentation/pages/profile_page.dart
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/news_feed_viewmodel.dart';
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/explore_viewmodel.dart';
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/bookmark_viewmodel.dart';
+import 'package:news_app_mvvm/features/news/presentation/viewmodels/search_viewmodel.dart';
 import 'package:news_app_mvvm/injection_container.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -22,22 +23,33 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    ChangeNotifierProvider(
-      create: (_) => sl<NewsFeedViewModel>(),
-      child: const NewsFeedPage(),
-    ),
-    ChangeNotifierProvider(
-      create: (_) => sl<ExploreViewModel>(),
-      child: const ExplorePage(),
-    ),
-    const NewsSearchPage(),
-    ChangeNotifierProvider(
-      create: (_) => sl<BookmarkViewModel>(),
-      child: const BookmarkPage(),
-    ),
-    const ProfilePage(),
-  ];
+  late final BookmarkViewModel _bookmarkViewModel;
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _bookmarkViewModel = sl<BookmarkViewModel>();
+    _pages = [
+      ChangeNotifierProvider(
+        create: (_) => sl<NewsFeedViewModel>(),
+        child: const NewsFeedPage(),
+      ),
+      ChangeNotifierProvider(
+        create: (_) => sl<ExploreViewModel>(),
+        child: const ExplorePage(),
+      ),
+      ChangeNotifierProvider(
+        create: (_) => sl<SearchViewModel>(),
+        child: const NewsSearchPage(),
+      ),
+      ChangeNotifierProvider.value(
+        value: _bookmarkViewModel,
+        child: const BookmarkPage(),
+      ),
+      const ProfilePage(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +97,10 @@ class _DashboardPageState extends State<DashboardPage> {
                   icon: Icons.bookmark_rounded,
                   label: 'Simpan',
                   isSelected: _currentIndex == 3,
-                  onTap: () => setState(() => _currentIndex = 3),
+                  onTap: () {
+                    setState(() => _currentIndex = 3);
+                    _bookmarkViewModel.fetchBookmarks(); // Refresh on tap
+                  },
                 ),
                 _NavItem(
                   icon: Icons.person_rounded,
