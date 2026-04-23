@@ -11,8 +11,18 @@ abstract class AuthRemoteDataSource {
     required String password,
   });
 
+  /// Proses registrasi akun baru
+  Future<AuthTokensModel> register({
+    required String name,
+    required String email,
+    required String password,
+  });
+
   /// Mengambil data profil user yang sedang login
   Future<UserModel> getProfile();
+
+  /// Memperbarui profil user
+  Future<UserModel> updateProfile(UserModel user);
 
   /// Proses logout untuk menghancurkan sesi di server menggunakan refresh token
   Future<void> logout({required String refreshToken});
@@ -49,6 +59,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Future<AuthTokensModel> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    final response = await apiClient.post(
+      '/api/v1/auth/register',
+      data: {'name': name, 'email': email, 'password': password},
+    );
+
+    if (response['success'] == true) {
+      return AuthTokensModel.fromJson(response['data'] as Map<String, dynamic>);
+    } else {
+      throw ServerException(
+        message:
+            response['message'] as String? ??
+            'Register failed due to unknown error',
+      );
+    }
+  }
+
+  @override
   Future<UserModel> getProfile() async {
     final response = await apiClient.get('/api/v1/auth/user');
 
@@ -59,6 +91,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         message:
             response['message'] as String? ??
             'Failed to get profile due to unknown error',
+      );
+    }
+  }
+
+  @override
+  Future<UserModel> updateProfile(UserModel user) async {
+    final response = await apiClient.post(
+      '/api/v1/auth/user',
+      data: user.toJson(),
+    );
+
+    if (response['success'] == true) {
+      return UserModel.fromJson(response['data'] as Map<String, dynamic>);
+    } else {
+      throw ServerException(
+        message: response['message'] as String? ?? 'Failed to update profile',
       );
     }
   }

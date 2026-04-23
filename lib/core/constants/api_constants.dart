@@ -11,6 +11,14 @@ class ApiConstants {
   static const String profile = '/auth/me';
   static const String refresh = '/auth/refresh';
   static const String logout = '/auth/logout';
+  static const String health = '/health';
+
+  // ===============================
+  // NEWS ENDPOINT
+  // ===============================
+  static const String newsCategories = '/news/categories';
+  static const String newsFeed = '/news/feed';
+  static const String newsDetail = '/news/article';
 
   // ===============================
   // STORAGE KEYS

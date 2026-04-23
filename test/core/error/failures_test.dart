@@ -59,4 +59,24 @@ void main() {
       expect(result, isTrue);
     });
   });
+
+  group('CacheFailure', () {
+    test('harus mereturn true saat dikomparasi dengan objek CacheFailure yang sama', () {
+      // 1. ARRANGE
+      const tFailure1 = CacheFailure(message: 'Storage Penuh');
+      const tFailure2 = CacheFailure(message: 'Storage Penuh');
+
+      // 2. ACT & 3. ASSERT
+      expect(tFailure1, equals(tFailure2));
+    });
+
+    test('harus mereturn false saat dikomparasi dengan objek CacheFailure dengan pesan berbeda', () {
+      // 1. ARRANGE
+      const tFailure1 = CacheFailure(message: 'Storage Penuh');
+      const tFailure2 = CacheFailure(message: 'Akses Ditolak');
+
+      // 2. ACT & 3. ASSERT
+      expect(tFailure1, isNot(equals(tFailure2)));
+    });
+  });
 }

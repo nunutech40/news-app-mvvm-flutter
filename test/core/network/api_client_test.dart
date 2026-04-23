@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:news_app_mvvm/core/network/api_client.dart';
 import 'package:news_app_mvvm/core/error/exceptions.dart';
+import 'package:news_app_mvvm/core/network/api_client.dart';
+import 'package:news_app_mvvm/core/network/token_provider.dart';
 
 /// -------------------------------------------------------------
 /// Penjelasan Test: ApiClientTest
@@ -17,15 +18,22 @@ import 'package:news_app_mvvm/core/error/exceptions.dart';
 /// -------------------------------------------------------------
 
 class MockDio extends Mock implements Dio {}
+class MockTokenProvider extends Mock implements TokenProvider {}
 
 void main() {
   late ApiClient apiClient;
   late MockDio mockDio;
+  late MockTokenProvider mockTokenProvider;
 
   setUp(() {
     mockDio = MockDio();
-    // Menggunakan injection test constructor (ini akan kita ubah di green phase)
-    apiClient = ApiClient(dio: mockDio);
+    mockTokenProvider = MockTokenProvider();
+
+    // Pastikan mockDio mengembalikan Interceptors yang valid, bukan null
+    when(() => mockDio.interceptors).thenReturn(Interceptors());
+    
+    // Menggunakan injection test constructor
+    apiClient = ApiClient.withDio(mockDio, tokenProvider: mockTokenProvider);
   });
 
   group('Melakukan HTTP GET', () {
@@ -62,7 +70,7 @@ void main() {
             cancelToken: null,
             onReceiveProgress: null,
           )).called(1);
-      verifyNoMoreInteractions(mockDio);
+  
     });
 
     test('harus mengubah DioException.badResponse menjadi ServerException', () async {

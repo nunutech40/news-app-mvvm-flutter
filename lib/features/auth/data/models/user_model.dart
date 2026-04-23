@@ -11,6 +11,10 @@ class UserModel extends User {
     required super.name,
     required super.email,
     super.avatarUrl = '',
+    super.bio = '',
+    super.phone = '',
+    super.preferences = '',
+    super.createdAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -19,6 +23,10 @@ class UserModel extends User {
       name: json['name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       avatarUrl: json['avatar_url']?.toString() ?? '',
+      bio: json['bio']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      preferences: json['preferences']?.toString() ?? '',
+      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
     );
   }
 
@@ -28,6 +36,9 @@ class UserModel extends User {
       'name': name,
       'email': email,
       'avatar_url': avatarUrl,
+      'bio': bio,
+      'phone': phone,
+      'preferences': preferences,
     };
   }
 

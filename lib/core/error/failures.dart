@@ -23,7 +23,11 @@ class ServerFailure extends Failure {
   List<Object?> get props => [message, statusCode];
 }
 
-/// Mewakili error yang dilemparkan akibat koneksi terputus/timeout di device user.
 class NetworkFailure extends Failure {
   const NetworkFailure({required String message}) : super(message: message);
+}
+
+/// Mewakili error yang terjadi saat operasi di Local Storage/Memori HP.
+class CacheFailure extends Failure {
+  const CacheFailure({required String message}) : super(message: message);
 }

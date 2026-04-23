@@ -3,19 +3,22 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:news_app_mvvm/features/auth/data/models/user_model.dart';
 import 'package:news_app_mvvm/core/error/exceptions.dart';
+import 'package:news_app_mvvm/core/network/token_provider.dart';
 
 abstract class AuthLocalDataSource {
   Future<void> saveTokens({required String accessToken, required String refreshToken});
   Future<void> clearTokens();
   Future<void> cacheProfile(UserModel user);
   Future<UserModel> getCachedProfile();
+  Future<String?> getRefreshToken();
+  Future<void> clearAll();
 }
 
 const cachedUserProfileKey = 'CACHED_USER_PROFILE';
 const accessTokenKey = 'ACCESS_TOKEN';
 const refreshTokenKey = 'REFRESH_TOKEN';
 
-class AuthLocalDataSourceImpl implements AuthLocalDataSource {
+class AuthLocalDataSourceImpl implements AuthLocalDataSource, TokenProvider {
   final FlutterSecureStorage secureStorage;
   final SharedPreferences sharedPreferences;
 
@@ -71,6 +74,34 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
         rethrow;
       }
       throw CacheException(message: 'Failed to read cached profile');
+    }
+  }
+
+  @override
+  Future<String?> getRefreshToken() async {
+    try {
+      return await secureStorage.read(key: refreshTokenKey);
+    } catch (e) {
+      throw CacheException(message: 'Failed to read refresh token');
+    }
+  }
+
+  @override
+  Future<String?> getAccessToken() async {
+    try {
+      return await secureStorage.read(key: accessTokenKey);
+    } catch (e) {
+      throw CacheException(message: 'Failed to read access token');
+    }
+  }
+
+  @override
+  Future<void> clearAll() async {
+    try {
+      await secureStorage.deleteAll();
+      await sharedPreferences.remove(cachedUserProfileKey);
+    } catch (e) {
+      throw CacheException(message: 'Failed to clear all local data');
     }
   }
 }

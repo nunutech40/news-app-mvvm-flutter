@@ -88,6 +88,70 @@ void main() {
     });
   });
 
+  group('AuthRemoteDataSource Register', () {
+    const tName = 'Budi';
+    const tEmail = 'test@example.com';
+    const tPassword = 'password123';
+    
+    final tJsonResponsePayload = {
+      'success': true,
+      'data': {
+        'access_token': 'bearer_token_super_rahasia_12345',
+        'refresh_token': 'refresh_12345'
+      }
+    };
+
+    const tAuthTokensModel = AuthTokensModel(
+      accessToken: 'bearer_token_super_rahasia_12345',
+      refreshToken: 'refresh_12345',
+    );
+    
+    test('harus mereturn AuthTokensModel apabila register via ApiClient berhasil', () async {
+      when(() => mockApiClient.post(
+            any(),
+            data: any(named: 'data'),
+            queryParameters: any(named: 'queryParameters'),
+            options: any(named: 'options'),
+            cancelToken: any(named: 'cancelToken'),
+            onSendProgress: any(named: 'onSendProgress'),
+            onReceiveProgress: any(named: 'onReceiveProgress')
+          )).thenAnswer((_) async => tJsonResponsePayload);
+
+      final result = await dataSource.register(name: tName, email: tEmail, password: tPassword);
+
+      expect(result, tAuthTokensModel);
+      verify(() => mockApiClient.post(
+            '/api/v1/auth/register',
+            data: {
+              'name': tName,
+              'email': tEmail,
+              'password': tPassword,
+            },
+            queryParameters: null,
+            options: null,
+            cancelToken: null,
+            onSendProgress: null,
+            onReceiveProgress: null
+          )).called(1);
+    });
+
+    test('harus memancarkan ServerException apabila backend melempar error saat register', () async {
+      when(() => mockApiClient.post(
+            any(),
+            data: any(named: 'data'),
+            queryParameters: any(named: 'queryParameters'),
+            options: any(named: 'options'),
+            cancelToken: any(named: 'cancelToken'),
+            onSendProgress: any(named: 'onSendProgress'),
+            onReceiveProgress: any(named: 'onReceiveProgress')
+          )).thenThrow(const ServerException(message: 'Email sudah digunakan', statusCode: 400));
+
+      final call = dataSource.register(name: tName, email: tEmail, password: tPassword);
+
+      expect(() => call, throwsA(isA<ServerException>()));
+    });
+  });
+
   group('AuthRemoteDataSource GetProfile', () {
     final tJsonResponsePayload = {
       'success': true,
