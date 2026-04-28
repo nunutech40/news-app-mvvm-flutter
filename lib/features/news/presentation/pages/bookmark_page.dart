@@ -110,7 +110,7 @@ class _BookmarkCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        DateHelper.timeAgo(article.publishedAt),
+                        article.publishedAt.timeAgo,
                         style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
                       ),
                       const Spacer(),

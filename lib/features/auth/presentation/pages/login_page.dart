@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:news_app_mvvm/core/theme/app_theme.dart';
 import 'package:news_app_mvvm/core/utils/validators.dart';
+import 'package:news_app_mvvm/core/utils/snackbar_mixin.dart';
 import 'package:news_app_mvvm/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:news_app_mvvm/features/auth/presentation/widgets/auth_text_field.dart';
 
@@ -13,7 +14,7 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
+class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin, SnackbarMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -73,18 +74,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           return; // Jangan munculkan snackbar karena BottomSheet sudah muncul
         }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_outline, color: AppTheme.error),
-                const SizedBox(width: 12),
-                Expanded(child: Text(msg)),
-              ],
-            ),
-            backgroundColor: AppTheme.surfaceElevated,
-          ),
-        );
+        showErrorSnackbar(msg);
       }
       // Jika berhasil, GoRouter (yang me-listen ke AuthViewModel) 
       // secara otomatis akan menendang user ke halaman Home.

@@ -104,7 +104,7 @@ class _GlobalAlertWrapperState extends State<GlobalAlertWrapper> {
     if (_viewModel.hasNetworkError) {
       final navContext = AppRouter.rootNavigatorKey.currentContext;
       if (navContext != null) {
-        UIHelpers.showNetworkBottomSheet(navContext, _viewModel.isTimeout);
+        navContext.showNetworkBottomSheet(_viewModel.isTimeout);
       }
       // Reset state agar tidak terus-menerus muncul
       _viewModel.clearNetworkError();

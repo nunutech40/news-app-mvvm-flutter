@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:news_app_mvvm/core/theme/app_theme.dart';
 import 'package:news_app_mvvm/core/utils/validators.dart';
+import 'package:news_app_mvvm/core/utils/snackbar_mixin.dart';
 import 'package:news_app_mvvm/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:news_app_mvvm/features/auth/presentation/widgets/auth_text_field.dart';
 
@@ -13,7 +14,7 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderStateMixin {
+class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderStateMixin, SnackbarMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -74,32 +75,10 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
           return; // Jangan munculkan snackbar karena BottomSheet sudah muncul
         }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_outline, color: AppTheme.error),
-                const SizedBox(width: 12),
-                Expanded(child: Text(msg)),
-              ],
-            ),
-            backgroundColor: AppTheme.surfaceElevated,
-          ),
-        );
+        showErrorSnackbar(msg);
       } else if (viewModel.isAuthenticated) {
         // Tampilkan pesan sukses karena berhasil daftar dan otomatis login
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.check_circle_outline, color: AppTheme.success),
-                SizedBox(width: 12),
-                Text('Registration successful!'),
-              ],
-            ),
-            backgroundColor: AppTheme.surfaceElevated,
-          ),
-        );
+        showSuccessSnackbar('Registration successful!');
         // GoRouter otomatis akan redirect ke Dashboard karena state berubah.
       }
     }

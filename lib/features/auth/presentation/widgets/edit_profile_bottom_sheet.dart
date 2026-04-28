@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:news_app_mvvm/core/theme/app_theme.dart';
+import 'package:news_app_mvvm/core/utils/snackbar_mixin.dart';
 import 'package:news_app_mvvm/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:news_app_mvvm/features/news/presentation/viewmodels/news_feed_viewmodel.dart';
 import 'package:news_app_mvvm/features/auth/domain/entities/user.dart';
@@ -32,7 +33,7 @@ class EditProfileBottomSheet extends StatefulWidget {
   State<EditProfileBottomSheet> createState() => _EditProfileBottomSheetState();
 }
 
-class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
+class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> with SnackbarMixin {
   final _formKey = GlobalKey<FormState>();
   
   late TextEditingController _nameController;
@@ -102,20 +103,10 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
       if (mounted) {
         if (authViewModel.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(authViewModel.errorMessage!),
-              backgroundColor: Colors.redAccent,
-            ),
-          );
+          showErrorSnackbar(authViewModel.errorMessage!);
         } else {
           Navigator.pop(context); // Close the sheet
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profile updated successfully! ✨'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          showSuccessSnackbar('Profile updated successfully! ✨');
         }
       }
     }
